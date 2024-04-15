@@ -1,16 +1,24 @@
+import os
+import re
 import json
 import zipfile
 import requests
 
+from dotenv import load_dotenv
 from bs4 import BeautifulSoup
 from fuzzywuzzy import process
 from urllib.parse import unquote
 
+# 抓取順序
+# anidb > myanimelist > acggamer
+
+load_dotenv()
 header = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0"
 }
 
 anidb_cache = []
+clientname = os.getenv("ANIDB_CLIENT_NAME")
 
 def search_myanimelist_from_title(title:str,limit:int):
     header = {
@@ -33,8 +41,16 @@ def search_anidb_from_title(title:str):
     result = process.extractOne(title, [x[3] for x in anidb_cache])
     return anidb_cache[[x[3] for x in anidb_cache].index(result[0])][0]
 
-def get_info_from_anidb(id):
-    r = requests.get(f"http://api.anidb.net:9001/httpapi?request=anime&client={str}&clientver={int}&aid=17773")
+def get_info_from_anidb(id) -> str:
+    """
+    get anime info from anidb
+    2 seconds only can request 1 time
+    """
+    r = requests.get(f"http://api.anidb.net:9001/httpapi?request=anime&client={clientname}&clientver=1&protover=1&aid={id}")
+    if r.status_code != 200:
+        return None
+    data = "https://cdn-eu.anidb.net/images/main/"+re.findall(r"<picture>(.*?)</picture>", r.text)[0]
+    return data
 
 def get_anidb_id():
     """
@@ -77,6 +93,20 @@ def from_acggamer(keyword):
         for item in data["results"]:
             print(item["titleNoFormatting"], unquote(item["url"]))
 
+def get_anime1me_all():
+    r = requests.get("https://d1zquzjgwo9yb.cloudfront.net/").json()
+    return {
+        i[1]: {
+            "cat": i[0],
+            "name": i[1],
+            "lastest": i[2],
+            "year": i[3],
+            "season": i[4],
+            "Fansub": i[5],
+            "url": f"https://anime1.me/?cat={i[0]}"
+        } for i in r
+    }
 
-get_anidb_id()
-print(search_anidb_from_title("刀劍神域 Alicization"))
+# get_anidb_id()
+# print(search_anidb_from_title("刀劍神域 Alicization"))
+get_info_from_anidb(17773)
