@@ -1,12 +1,27 @@
-import requests
-from bs4 import BeautifulSoup
 import json
+import zipfile
+import requests
+
+from bs4 import BeautifulSoup
+from fuzzywuzzy import process
 from urllib.parse import unquote
 
 header = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0"
 }
 
+anidb_cache = []
+
+
+def search_anidb_from_title(title:str):
+    """
+    search anidb id from title
+    """
+    global anidb_cache
+    if not anidb_cache:
+        get_anidb_id()
+    result = process.extractOne(title, [x[3] for x in anidb_cache])
+    return anidb_cache[[x[3] for x in anidb_cache].index(result[0])][0]
 
 def get_info_from_anidb(id):
     r = requests.get(f"http://api.anidb.net:9001/httpapi?request=anime&client={str}&clientver={int}&aid=17773")
@@ -16,9 +31,22 @@ def get_anidb_id():
     one day only can request 1 time
     """
     # r = requests.get("http://anidb.net/api/anime-titles.dat.gz")
-    r = requests.get("http://anidb.net/api/anime-titles.xml.gz")
-    with open("anime-titles.xml.gz", "wb") as f:
-        f.write(r.content)
+    # with open("anime-titles.xml.gz", "wb") as f:
+    #     f.write(r.content)
+    # with zipfile.ZipFile("anime-titles.xml.gz", "r") as zip_ref:
+    #     zip_ref.extractall("anime-titles.xml")
+    with open("anime-titles.dat", "r", encoding="utf-8") as f:
+        data = []
+        for line in f:
+            if line.startswith("#"):
+                continue
+            # <aid>|<type>|<language>|<title>
+            if line.split("|")[2] == "zh-Hans":
+                temp = line.split("|")
+                temp[3] = temp[3].replace("\n", "").strip()
+                data.append(temp)
+    global anidb_cache
+    anidb_cache = data
 
 def from_acggamer(keyword):
     """
@@ -40,4 +68,5 @@ def from_acggamer(keyword):
             print(item["titleNoFormatting"], unquote(item["url"]))
 
 
-from_acggamer("迷宮飯")
+get_anidb_id()
+print(search_anidb_from_title("刀劍神域 Alicization"))
