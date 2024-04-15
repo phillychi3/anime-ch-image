@@ -12,6 +12,16 @@ header = {
 
 anidb_cache = []
 
+def search_myanimelist_from_title(title:str,limit:int):
+    header = {
+        "Authorization": "Bearer ..."
+    }
+    r = requests.get(f"https://api.myanimelist.net/v2/anime?q={title}&limit={limit}", headers=header)
+    if r.status_code != 200:
+        return None
+    data = json.loads(r.text)
+    return data
+
 
 def search_anidb_from_title(title:str):
     """
