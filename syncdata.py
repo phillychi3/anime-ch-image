@@ -7,10 +7,10 @@ import requests
 from dotenv import load_dotenv
 from bs4 import BeautifulSoup
 from fuzzywuzzy import process
-from urllib.parse import unquote
+from urllib.parse import unquote, quote
 
 # 抓取順序
-# anidb > myanimelist > acggamer
+# anidb > bangumi > acggamer > myanimelist
 
 load_dotenv()
 header = {
@@ -19,17 +19,33 @@ header = {
 
 anidb_cache = []
 clientname = os.getenv("ANIDB_CLIENT_NAME")
+animelistauth = os.getenv("ANIMELIST_AUTH")
 
-def search_myanimelist_from_title(title:str,limit:int):
+def search_bangumi_from_title(title:str):
+    """
+    search bangumi id from title
+    """
     header = {
-        "Authorization": "Bearer ..."
+        "User-Agent": "phillychi3/anime-ch-image"
     }
-    r = requests.get(f"https://api.myanimelist.net/v2/anime?q={title}&limit={limit}", headers=header)
+    r = requests.get(f"https://api.bgm.tv/search/subject/{quote(title)}?type=2&responseGroup=small&max_results=4", headers=header)
     if r.status_code != 200:
         return None
     data = json.loads(r.text)
     return data
 
+def search_myanimelist_from_title(title:str,limit:int):
+    header = {
+        "X-MAL-CLIENT-ID": animelistauth
+    }
+    r = requests.get(f"https://api.myanimelist.net/v2/anime?q={title}&limit={limit}", headers=header)
+    if r.status_code != 200:
+        return None
+    data = json.loads(r.text)
+    if not data["list"]:
+        return None
+    data = data["list"][0]["images"]["large"]
+    return data
 
 def search_anidb_from_title(title:str):
     """
