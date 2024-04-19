@@ -98,7 +98,7 @@ def get_anidb_id():
             if line.startswith("#"):
                 continue
             # <aid>|<type>|<language>|<title>
-            if line.split("|")[2] == "zh-Hans":
+            if line.split("|")[2] == "zh-Hans" or line.split("|")[2] == "zh-Hant":
                 temp = line.split("|")
                 temp[3] = temp[3].replace("\n", "").strip()
                 data.append(temp)
@@ -131,9 +131,7 @@ def get_anime1me_all() -> list[str]:
     return [i[1] for i in r]
 
 
-get_anidb_id()
-Allanime = get_anime1me_all()
-output = {}
+
 """
 xxxanime: "xxx.png",
 
@@ -159,7 +157,11 @@ async def main():
         output[i] = data
         print(i, data)
 
-asyncio.run(main())
-with open("anime.json", "w", encoding="utf-8") as f:
-    json.dump(output, f, ensure_ascii=False, indent=4)
+if __name__ == "__main__":
+    get_anidb_id()
+    Allanime = get_anime1me_all()
+    output = {}
+    asyncio.run(main())
+    with open("anime.json", "w", encoding="utf-8") as f:
+        json.dump(output, f, ensure_ascii=False, indent=4)
 
