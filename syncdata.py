@@ -145,20 +145,20 @@ async def main():
         if id:
             data = await get_info_from_anidb(id)
         else:
-            print(f"{i} not found in anidb")
+            print(f"{i.encode('utf-8')} not found in anidb")
             data = await search_bangumi_from_title(i)
             if not data:
-                print(f"{i} not found in bangumi")
+                print(f"{i.encode('utf-8')} not found in bangumi")
                 data = await from_acggamer(i)
                 if not data:
-                    print(f"{i} not found in acggamer")
+                    print(f"{i.encode('utf-8')} not found in acggamer")
                     data = await search_myanimelist_from_title(i,4)
                     if not data:
-                        print(f"{i} not found in myanimelist")
+                        print(f"{i.encode('utf-8')} not found in myanimelist")
                         output[i] = None
                         continue
         output[i] = data
-        print(i, data)
+        print(i.encode('utf-8'), data.encode('utf-8'))
 
 if __name__ == "__main__":
     get_anidb_id()
