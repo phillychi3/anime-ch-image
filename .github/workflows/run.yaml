@@ -29,12 +29,10 @@ jobs:
           ANIMELIST_AUTH: ${{ secrets.ANIMELIST_AUTH }}
       - name: deploy
         run: |
-          git config --global user.email "${{ secrets.GITHUB_ACTOR }}@users.noreply.github.com"
-          git config --global user.name "${{ secrets.GITHUB_ACTOR }}"
+          git config --global user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git config --global user.name "$GITHUB_ACTOR"
           git checkout data || git checkout -b data
           git add -A
           git commit -m "Update data"
-          git push https://_:"$token"@github.com/${{ github.event.repository.full_name }}.git data
-        env:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.event.repository.full_name }}.git data
 
