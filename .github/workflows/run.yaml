@@ -1,8 +1,11 @@
 name: Run get data
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "0 0 * * *"
+  push:
+    branches: [main]
 
 permissions:
   contents: read
