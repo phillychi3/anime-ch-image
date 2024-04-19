@@ -87,11 +87,11 @@ def get_anidb_id():
     """
     one day only can request 1 time
     """
-    # r = requests.get("http://anidb.net/api/anime-titles.dat.gz")
-    # with open("anime-titles.xml.gz", "wb") as f:
-    #     f.write(r.content)
-    # with zipfile.ZipFile("anime-titles.xml.gz", "r") as zip_ref:
-    #     zip_ref.extractall("anime-titles.xml")
+    r = requests.get("http://anidb.net/api/anime-titles.dat.gz")
+    with open("anime-titles.xml.gz", "wb") as f:
+        f.write(r.content)
+    with zipfile.ZipFile("anime-titles.xml.gz", "r") as zip_ref:
+        zip_ref.extractall("anime-titles.xml")
     with open("anime-titles.dat", "r", encoding="utf-8") as f:
         data = []
         for line in f:
@@ -161,7 +161,9 @@ if __name__ == "__main__":
     get_anidb_id()
     Allanime = get_anime1me_all()
     output = {}
+    # ceeate a folder
+    os.makedirs("dict", exist_ok=True)
     asyncio.run(main())
-    with open("anime.json", "w", encoding="utf-8") as f:
+    with open(os.path.join("dict", "anime.json"), "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=4)
 
