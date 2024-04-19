@@ -1,7 +1,8 @@
 import os
 import re
 import json
-import zipfile
+import gzip
+import shutil
 import aiohttp
 import requests
 import asyncio
@@ -87,11 +88,13 @@ def get_anidb_id():
     """
     one day only can request 1 time
     """
-    r = requests.get("http://anidb.net/api/anime-titles.dat.gz")
-    with open("anime-titles.xml.gz", "wb") as f:
-        f.write(r.content)
-    with zipfile.ZipFile("anime-titles.xml.gz", "r") as zip_ref:
-        zip_ref.extractall("anime-titles.xml")
+    if not os.exists("anime-titles.dat"):
+        r = requests.get("http://anidb.net/api/anime-titles.dat.gz")
+        with open("anime-titles.dat.gz", "wb") as f:
+            f.write(r.content)
+        with gzip.open('anime-titles.dat.gz', 'rb') as f_in:
+            with open('anime-titles.dat', 'wb') as f_out:
+                shutil.copyfileobj(f_in, f_out)
     with open("anime-titles.dat", "r", encoding="utf-8") as f:
         data = []
         for line in f:
