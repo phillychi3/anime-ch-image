@@ -28,14 +28,22 @@ async def search_bangumi_from_title(title:str):
     search bangumi id from title
     """
     header = {
-        "User-Agent": "phillychi3/anime-ch-image"
+        "User-Agent": "phillychi3/anime-ch-image",
+        "Accept": "application/json",
+        "Cookie": "chii_searchDateLine=1713520746"
     }
-    async with aiohttp.ClientSession() as session:
-        async with session.get(f"https://api.bgm.tv/search/subject/{quote(title)}?type=2&responseGroup=small&max_results=4", headers=header) as r:
+    async with aiohttp.ClientSession(headers=header) as session:
+        await asyncio.sleep(2)
+        async with session.get(f"https://api.bgm.tv/search/subject/{quote(title)}?type=2&responseGroup=small&max_results=4") as r:
             if r.status != 200:
                 return None
             data = await r.json()
-            return data
+            if "code" in data and data["code"] != 200:
+                return None
+        if not data["list"]:
+            return None
+        data = data["list"][0]["images"]["large"]
+        return data
 
 async def search_myanimelist_from_title(title:str,limit:int):
     header = {
@@ -46,9 +54,9 @@ async def search_myanimelist_from_title(title:str,limit:int):
             if r.status != 200:
                 return None
             data = await r.json()
-            if not data["list"]:
+            if not data["data"]:
                 return None
-            data = data["list"][0]["images"]["large"]
+            data = data["data"][0]["node"]["main_picture"]["large"]
             return data
 
 def search_anidb_from_title(title:str):
@@ -58,8 +66,8 @@ def search_anidb_from_title(title:str):
     global anidb_cache
     if not anidb_cache:
         get_anidb_id()
-    result = process.extractOne(title, [x[3] for x in anidb_cache])
-    return anidb_cache[[x[3] for x in anidb_cache].index(result[0])][0]
+    result = process.extractOne(title, [x[3] for x in anidb_cache], score_cutoff=90)
+    return anidb_cache[[x[3] for x in anidb_cache].index(result[0])][0] if result else None
 
 async def get_info_from_anidb(id) -> str:
     """
@@ -107,10 +115,10 @@ async def from_acggamer(keyword):
             f"https://cse.google.com/cse/element/v1?rsz=10&num=10&hl=zh-TW&source=gcsc&gss=.tw&cselibv=8435450f13508ca1&cx=partner-pub-9012069346306566%3Akd3hd85io9c&q={keyword}+more%3A%E6%89%BE%E4%BD%9C%E5%93%81&safe=active&cse_tok=AB-tC_6VMyQtkrLpd_OErEMPcBI-%3A1712904578463&sort=&exp=cc&callback=google.search.cse.api6738",
             headers=header
         ) as r:
-            print(r.status)
             text = await r.text()
-            print(text)
             if r.status != 200:
+                return None
+            if "Unauthorized access to internal API" in text:
                 return None
             soup = BeautifulSoup(text, "html.parser")
             data = json.loads(soup.text.split("(")[1].split(")")[0])
@@ -131,24 +139,21 @@ xxxanime: "xxx.png",
 
 """
 async def main():
-    for i in Allanime:
-        try:
-            data = await get_info_from_anidb(i)
+    for i in Allanime[:10]:
+        id =  search_anidb_from_title(i)
+        if id:
+            data = await get_info_from_anidb(id)
+        else:
+            print(f"{i} not found in anidb")
+            data = await search_bangumi_from_title(i)
             if not data:
-                raise ValueError("No data from anidb")
-        except:
-            try:
-                data = await search_bangumi_from_title(i)
+                print(f"{i} not found in bangumi")
+                data = await from_acggamer(i)
                 if not data:
-                    raise ValueError("No data from bangumi")
-            except:
-                try:
-                    data = await from_acggamer(i)
+                    print(f"{i} not found in acggamer")
+                    data = await search_myanimelist_from_title(i,4)
                     if not data:
-                        raise ValueError("No data from acggamer")
-                except:
-                    data = await search_myanimelist_from_title(i)
-                    if not data:
+                        print(f"{i} not found in myanimelist")
                         output[i] = None
                         continue
         output[i] = data
