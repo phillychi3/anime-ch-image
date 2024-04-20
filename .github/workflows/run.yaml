@@ -33,6 +33,12 @@ jobs:
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git branch data
           git add -A
-          git commit -m "Update data"
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.event.repository.full_name }}.git data
+          CHANGE_COUNT=$(git status --porcelain | wc -l)
+          if [ $CHANGE_COUNT -gt 0 ]
+          then
+            git commit -m "Update data"
+            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.event.repository.full_name }}.git data
+          else
+            echo "No changes"
+          fi
 
