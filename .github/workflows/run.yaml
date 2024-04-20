@@ -29,16 +29,24 @@ jobs:
           ANIMELIST_AUTH: ${{ secrets.ANIMELIST_AUTH }}
       - name: deploy
         shell: bash
+        env:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          user_name: github-actions[bot]
+          user_email: github-actions[bot]@users.noreply.github.com
         run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git config user.name "$user_name"
+          git config user.email "$user_email"
           git branch data
+          git reset --hard
+          git rm --cached -r .
+          mv dist/* .
+          rm -rf dist
           git add -A
           CHANGE_COUNT=$(git status --porcelain | wc -l)
           if [ $CHANGE_COUNT -gt 0 ]
           then
             git commit -m "Update data"
-            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.event.repository.full_name }}.git data
+            git push https://_:"$token"@github.com/${{ github.event.repository.full_name }}.git data
           else
             echo "No changes"
           fi
