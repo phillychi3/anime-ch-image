@@ -27,11 +27,11 @@ jobs:
       - name: deploy
         shell: bash
         run: |
-          cd dict
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git branch data
-          git reset --hard
+          find . -path ./dist -prune -o -type f -exec git rm --cached {} +
+          cp -r dict/* .
+          rm -rf dict
           git add -A
           CHANGE_COUNT=$(git status --porcelain | wc -l)
           if [ $CHANGE_COUNT -gt 0 ]
