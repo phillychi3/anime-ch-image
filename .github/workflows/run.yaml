@@ -28,6 +28,7 @@ jobs:
           ANIDB_CLIENT_NAME: ${{ secrets.ANIDB_CLIENT_NAME }}
           ANIMELIST_AUTH: ${{ secrets.ANIMELIST_AUTH }}
       - name: deploy
+        shell: bash
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
