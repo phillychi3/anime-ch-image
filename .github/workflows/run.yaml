@@ -7,9 +7,6 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: read
-
 jobs:
   test_on_windows:
     runs-on: windows-latest
