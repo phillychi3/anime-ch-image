@@ -90,10 +90,11 @@ async def get_info_from_anidb(id) -> str:
                 if r.status != 200:
                     return None
                 text = await r.text()
-                data = "https://cdn-eu.anidb.net/images/main/"+re.findall(r"<picture>(.*?)</picture>", text)
-                if len(data) == 0:
+                picture = re.findall(r"<picture>(.*?)</picture>", text)
+                if not picture:
                     return None
-                return data[0]
+                data = "https://cdn-eu.anidb.net/images/main/"+picture[0]
+                return data
         except Exception as e:
             print(e)
             return None
