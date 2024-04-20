@@ -182,7 +182,7 @@ async def main():
                         output[i] = None
                         continue
         output[i] = data
-        tryprint(i+ " " + data)
+        tryprint(i+ " " + str(data))
 
 if __name__ == "__main__":
     get_anidb_id()
