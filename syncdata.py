@@ -133,6 +133,11 @@ def get_anime1me_all() -> list[str]:
     r = requests.get("https://d1zquzjgwo9yb.cloudfront.net/").json()
     return [i[1] for i in r]
 
+def tryprint(text):
+    try:
+        print(text)
+    except UnicodeEncodeError:
+        print(text.encode("utf-8"))
 
 
 """
@@ -145,20 +150,20 @@ async def main():
         if id:
             data = await get_info_from_anidb(id)
         else:
-            print(f"{i.encode('utf-8')} not found in anidb")
+            tryprint(f"{i} not found in anidb")
             data = await search_bangumi_from_title(i)
             if not data:
-                print(f"{i.encode('utf-8')} not found in bangumi")
+                tryprint(f"{i} not found in bangumi")
                 data = await from_acggamer(i)
                 if not data:
-                    print(f"{i.encode('utf-8')} not found in acggamer")
+                    tryprint(f"{i} not found in acggamer")
                     data = await search_myanimelist_from_title(i,4)
                     if not data:
-                        print(f"{i.encode('utf-8')} not found in myanimelist")
+                        tryprint(f"{i} not found in myanimelist")
                         output[i] = None
                         continue
         output[i] = data
-        print(i.encode('utf-8'), data.encode('utf-8'))
+        tryprint(i+ " " + data)
 
 if __name__ == "__main__":
     get_anidb_id()
