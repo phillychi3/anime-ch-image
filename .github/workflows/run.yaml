@@ -29,14 +29,10 @@ jobs:
           ANIMELIST_AUTH: ${{ secrets.ANIMELIST_AUTH }}
       - name: deploy
         shell: bash
-        env:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          user_name: github-actions[bot]
-          user_email: github-actions[bot]@users.noreply.github.com
         run: |
           cd dict
-          git config user.name "$user_name"
-          git config user.email "$user_email"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git branch data
           git reset --hard
           git add -A
@@ -44,8 +40,14 @@ jobs:
           if [ $CHANGE_COUNT -gt 0 ]
           then
             git commit -m "Update data"
-            git push https://_:"$token"@github.com/${{ github.event.repository.full_name }}.git data
           else
             echo "No changes"
           fi
+      - name: push
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: data
+          force: true
+          directory: dict
 
