@@ -112,6 +112,7 @@ async def from_acggamer(keyword):
     """
     使用巴哈搜尋資料
     由於使用google服務， 需要proxy
+    似乎無法使用此服務進行搜尋
     """
     async with aiohttp.ClientSession() as session:
         async with session.get(
@@ -131,7 +132,7 @@ async def from_acggamer(keyword):
 
 def get_anime1me_all() -> list[str]:
     r = requests.get("https://d1zquzjgwo9yb.cloudfront.net/").json()
-    return [i[1] for i in r]
+    return [re.search("<a.*?>(.*?)<\/a>",i[1]).group(1) if re.search("<a.*?>(.*?)<\/a>",i[1]) else i[1] for i in r]
 
 def tryprint(text):
     try:
@@ -145,7 +146,7 @@ xxxanime: "xxx.png",
 
 """
 async def main():
-    for i in Allanime[:10]:
+    for i in Allanime:
         id =  search_anidb_from_title(i)
         if id:
             data = await get_info_from_anidb(id)
