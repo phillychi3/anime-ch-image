@@ -29,7 +29,7 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          find . -path ./.git -prune -o -path ./dist -prune -o -type f -exec git rm --cached {} +
+          find . -path ./.git -prune -o -path ./dict -prune -o -type f -exec rm -f {} +
           cp -r dict/* .
           rm -rf dict
           git add -A
