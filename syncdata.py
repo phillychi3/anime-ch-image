@@ -2,7 +2,6 @@ import os
 import re
 import json
 import gzip
-import shutil
 import aiohttp
 import requests
 import asyncio
@@ -108,8 +107,9 @@ def get_anidb_id():
         with open("anime-titles.dat.gz", "wb") as f:
             f.write(r.content)
         with gzip.open('anime-titles.dat.gz', 'rb') as f_in:
+            f_in.seek(0)
             with open('anime-titles.dat', 'wb') as f_out:
-                shutil.copyfileobj(f_in, f_out)
+                f_out.write(f_in.read())
     with open("anime-titles.dat", "r", encoding="utf-8") as f:
         data = []
         for line in f:
