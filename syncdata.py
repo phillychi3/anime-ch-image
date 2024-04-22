@@ -103,7 +103,10 @@ def get_anidb_id():
     one day only can request 1 time
     """
     if not os.path.exists("anime-titles.dat"):
+        # 似乎無法正確下載
         r = requests.get("http://anidb.net/api/anime-titles.dat.gz")
+        print(r.headers['Content-Type'])
+        print(r.status_code)
         with open("anime-titles.dat.gz", "wb") as f:
             f.write(r.content)
         with gzip.open('anime-titles.dat.gz', 'rb') as f_in:
