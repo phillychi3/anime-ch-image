@@ -1,5 +1,0 @@
-fuzzywuzzy[speedup]
-requests
-beautifulsoup4
-aiohttp
-python-dotenv
